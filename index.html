@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open in REAPER</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+    p { color: #888; }
+    a { color: #4a9eff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Opening in REAPER...</h1>
+    <p>If nothing happens, <a href="#" id="manual-link">click here</a> or allow your browser to open external applications.</p>
+    <p style="margin-top: 2rem; font-size: 0.8rem; color: #555;">
+      Make sure you've run <code>DMN_ReaperLinkHandler.reg</code> to register the protocol.
+    </p>
+  </div>
+
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      
+      if (!id) {
+        document.querySelector("h1").textContent = "Missing ID parameter";
+        document.querySelector("p").textContent = "URL should include ?id=1234";
+        return;
+      }
+
+      const reaperUrl = "reaper://goto?id=" + encodeURIComponent(id);
+      
+      // Update manual link
+      document.getElementById("manual-link").href = reaperUrl;
+      
+      // Auto-redirect to reaper:// protocol
+      window.location.href = reaperUrl;
+    })();
+  </script>
+</body>
+</html>
