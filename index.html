@@ -37,12 +37,24 @@
     (function() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
-      const session = params.get("session");
+      let session = params.get("session");  // Single session (simple mode)
+      const sessions = params.get("sessions");  // Combined sessions (M=xxx, F=yyy)
+      const actor = params.get("actor");  // Which actor: M or F
       
       if (!id) {
         document.querySelector("h1").textContent = "Missing ID parameter";
         document.querySelector("p").textContent = "URL should include ?id=1234";
         return;
+      }
+
+      // If combined sessions format is used, parse it
+      if (sessions && actor) {
+        // Parse format: "M=SessionMale, F=SessionFemale"
+        const regex = new RegExp(actor + "\\s*=\\s*([^,]+)", "i");
+        const match = sessions.match(regex);
+        if (match) {
+          session = match[1].trim();
+        }
       }
 
       // Build reaper:// URL with id and optional session
