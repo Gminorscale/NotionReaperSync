@@ -37,6 +37,7 @@
     (function() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
+      const session = params.get("session");
       
       if (!id) {
         document.querySelector("h1").textContent = "Missing ID parameter";
@@ -44,7 +45,11 @@
         return;
       }
 
-      const reaperUrl = "reaper://goto?id=" + encodeURIComponent(id);
+      // Build reaper:// URL with id and optional session
+      let reaperUrl = "reaper://goto?id=" + encodeURIComponent(id);
+      if (session) {
+        reaperUrl += "&session=" + encodeURIComponent(session);
+      }
       
       // Update manual link
       document.getElementById("manual-link").href = reaperUrl;
