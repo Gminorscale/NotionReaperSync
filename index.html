@@ -29,7 +29,8 @@
     <h1>Opening in REAPER...</h1>
     <p>If nothing happens, <a href="#" id="manual-link">click here</a> or allow your browser to open external applications.</p>
     <p style="margin-top: 2rem; font-size: 0.8rem; color: #555;">
-      Make sure you've run <code>DMN_ReaperLinkHandler.reg</code> to register the protocol.
+      Make sure you've run <code>DMN_ReaperLinkHandler.reg</code> to register the protocol.<br>
+      For multi-actor (M=…, F=…), the <code>sessions</code> param must be URL-encoded (e.g. comma → %2C) so the value isn't truncated.
     </p>
   </div>
 
@@ -40,7 +41,7 @@
       let session = params.get("session");  // Single session (simple mode)
       const sessions = params.get("sessions");  // Combined sessions (M=xxx, F=yyy)
       const actor = params.get("actor");  // Which actor: M or F
-      
+
       if (!id) {
         document.querySelector("h1").textContent = "Missing ID parameter";
         document.querySelector("p").textContent = "URL should include ?id=1234";
@@ -48,12 +49,26 @@
       }
 
       // If combined sessions format is used, parse it
+      // Format: "M=SessionMale, F=SessionFemale" or "F=SessionFemale" or "M=SessionMale"
       if (sessions && actor) {
-        // Parse format: "M=SessionMale, F=SessionFemale"
-        const regex = new RegExp(actor + "\\s*=\\s*([^,]+)", "i");
-        const match = sessions.match(regex);
-        if (match) {
-          session = match[1].trim();
+        const a = (actor + "").trim().toUpperCase();
+        if (a === "M" || a === "F") {
+          // Split by comma (with optional space) so we get "M=Name1", "F=Name2"
+          const parts = sessions.split(/\s*,\s*/);
+          for (let i = 0; i < parts.length; i++) {
+            const part = parts[i].trim();
+            const prefix = a + "=";
+            if (part.toUpperCase().startsWith(prefix)) {
+              session = part.slice(prefix.length).trim();
+              break;
+            }
+          }
+          // Fallback: regex for "F=Something" in case session name contains a comma
+          if (!session) {
+            const regex = new RegExp(a + "\\s*=\\s*([^]*?)(?:\\s*,\\s*[MF]\\s*=|$)", "i");
+            const match = sessions.match(regex);
+            if (match) session = match[1].trim();
+          }
         }
       }
 
